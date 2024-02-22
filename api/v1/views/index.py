@@ -1,37 +1,30 @@
 #!/usr/bin/python3
-"""
-first answer
-"""
-
-from flask import jsonify
+"""Returns JSON status"""
 from api.v1.views import app_views
-from console import classes
+from flask import jsonify
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 from models import storage
-from models.base_model import BaseModel
 
 
-@app_views.route('/status', strict_slashes=False)
+@app_views.route("/status", methods=["GET"], strict_slashes=False)
 def status():
-    """
-    successful output with JSON
-    """
+    """Returns the status of our API"""
     return jsonify({"status": "OK"})
 
 
-@app_views.route('/stats', strict_slashes=False)
-def some_stats():
-    """
-    list all classes by type
-    """
-    tables = {"Amenity": 'amenities',
-              "City": 'cities',
-              "Place": 'places',
-              "Review": 'reviews',
-              "State": 'states',
-              "User": 'users'}
+@app_views.route('/stats', methods=["GET"], strict_slashes=False)
+def count_objects():
+    """Counts the number of objects by type"""
+    classes = [Amenity, City, Place, Review, State, User]
+    names = ["amenities", "cities", "places", "reviews", "states", "users"]
 
-    stats_class = {}
+    num_obj = {}
+    for i in range(len(classes)):
+        num_obj[names[i]] = storage.count(classes[i])
 
-    stats_class = {f'{tables[k]}': storage.count(v)
-                   for k, v in classes.items() if v != BaseModel}
-    return jsonify(stats_class)
+    return jsonify(num_obj)
